@@ -35,13 +35,14 @@ return {
     window = {
       mappings = {
         -- Previous filtering solution from last time
-        ["/"] = {
-          "filter",
-          config = {
-            search_spec = "visible",
-            match_algorithm = "fuzzy",
-          },
-        },
+        ["/"] = "filter",
+        -- ["/"] = {
+        -- "filter",
+        -- config = {
+        --   search_spec = "visible",
+        --   match_algorithm = "fuzzy",
+        -- },
+        -- },
         ["<esc>"] = "clear_filter",
         ["<C-c>"] = "clear_filter",
 
