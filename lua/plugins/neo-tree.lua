@@ -1,33 +1,30 @@
--- return {
---   "nvim-neo-tree/neo-tree.nvim",
---   branch = "v3.x",
---   opts = {
---     window = {
---       mappings = {
---         -- Remove default split mappings if you want
---         ["s"] = "noop",
---         ["S"] = "noop",
---
---         -- Your custom mappings
---         ["<C-v>"] = "open_vsplit", -- Vertical split
---         ["<C-x>"] = "open_split", -- Horizontal split
---       },
---     },
---   },
--- }
---
 return {
   "nvim-neo-tree/neo-tree.nvim",
   branch = "v3.x",
   dependencies = {
     "nvim-lua/plenary.nvim",
-    "nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
+    "nvim-tree/nvim-web-devicons",
     "MunifTanjim/nui.nvim",
+    -- This plugin is the magic behind the window picker
+    "s1n7ax/nvim-window-picker",
   },
   opts = {
-    -- This setting is crucial for your request.
-    -- It ensures that "hidden" items (like .gitignored files) are still present in the tree buffer but visually dimmed.
-    -- This makes them available for the "visible_items" filter to find.
+    -- This is a good practice to ensure the window picker is configured.
+    -- LazyVim often handles this, but being explicit is safe.
+    config = function()
+      require("window-picker").setup({
+        filter_rules = {
+          include_current_win = false,
+          autoselect_one = true,
+          -- Filter out neo-tree and other floating windows
+          bo = {
+            filetype = { "neo-tree", "neo-tree-popup", "notify", "TelescopePrompt" },
+            buftype = { "terminal", "quickfix" },
+          },
+        },
+      })
+    end,
+    -- Keeps hidden files available for our filter
     filesystem = {
       filtered_items = {
         visible = true, -- Show filtered items as dimmed
@@ -37,33 +34,28 @@ return {
     },
     window = {
       mappings = {
-        -- Your existing custom mappings
-        ["<C-v>"] = "open_vsplit",
-        ["<C-x>"] = "open_split",
-        ["s"] = "noop",
-
-        -- DEFAULT BEHAVIOR (for reference)
-        -- The default "/" runs "fuzzy_finder", which searches all files in the project.
-        -- The default "f" runs "filter_on_submit", which requires you to press Enter.
-
-        -- YOUR NEW BEHAVIOR
-        -- This overrides "/" to use the built-in filter command.
-        -- We pass a specific configuration to it.
+        -- Previous filtering solution from last time
         ["/"] = {
           "filter",
           config = {
-            -- This is the key setting. It tells the filter to only consider nodes
-            -- that are currently visible in the tree.
             search_spec = "visible",
-
-            -- This makes the filtering happen live, as you type.
             match_algorithm = "fuzzy",
           },
         },
-
-        -- It's good practice to have an easy way to clear the filter.
         ["<esc>"] = "clear_filter",
-        ["<C-c>"] = "clear_filter", -- Alternative mapping
+        ["<C-c>"] = "clear_filter",
+
+        -- New mappings for window picking splits
+        ["<C-v>"] = "vsplit_with_window_picker",
+        ["<C-x>"] = "split_with_window_picker",
+
+        -- Optional: You can keep the old behavior on a different key
+        -- ["s"] = "open_split",
+        -- ["S"] = "open_vsplit",
+
+        -- Ensuring default mappings don't conflict
+        ["s"] = "noop",
+        ["S"] = "noop",
       },
     },
   },
